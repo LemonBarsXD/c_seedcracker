@@ -68,6 +68,9 @@ void seedcrack( int input[], int a ) {
 	int buffer[a];
 	unsigned int seed;
 
+
+	// TODO: Maybe faster and more optimised
+
 	for(seed = 1; seed < SEARCH_DEPTH; seed++) {
 		srand(seed);
 		for(int i = 0; i < a; i++) {
