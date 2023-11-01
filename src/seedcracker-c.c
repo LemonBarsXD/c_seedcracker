@@ -3,7 +3,7 @@
  Name        : seedcracker-c.c
  Author      : Upwn, LemonBarsXD
  Version     : 1.0
- Copyright   : No
+ Copyright   : MIT License, Copyright (c) 2023 Upwn
  Description : Rand seedcracker in c
  ============================================================================
  */
