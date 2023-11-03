@@ -30,18 +30,17 @@ void seedcrack( int input[], int a ); // takes input(s) and amount of input(s)
 
 int main(void) {
 
-	/* Amount of inputs */
+	/* Initial memory allocation */
 	int a;
+	int *uInput;
+
+
 	fputs("Amount: ", stdout);
 	scanf("%d", &a);
 
-	/* Flushing stdout, don't know if it's necessary */
-	fflush(stdout);
-
-	/* Initial memory allocation */
-	int *uInput = malloc(sizeof(int) * a);
-
 	/* User input */
+	uInput = malloc(sizeof(int) * a);
+
 	for(int i = 0; i < a; i++) {
 		printf("%d: ", i+1);
 		scanf("%d", &uInput[i]);
@@ -55,7 +54,6 @@ int main(void) {
 	/* Exiting */
 	return EXIT_SUCCESS;
 }
-
 
 void clearArray( int *array, int size ) {
 	for(int i = 0; i < size; i++) {
@@ -73,13 +71,13 @@ void seedcrack( int input[], int a ) {
 
 	for(seed = 1; seed < SEARCH_DEPTH; seed++) {
 		srand(seed);
-		for(int i = 0; i < a; i++) {
+		for(unsigned int i = 0; i < a; i++) {
 				buffer[i] = rand();
 			}
 
-		for(int i = 0; i < a; i++) {
-			if(input[i] == buffer[i]) {
-				if(i+1 == a) {
+		for(unsigned int j = 0; j < a; j++) {
+			if(input[j] == buffer[j]) {
+				if(j+1 == a) {
 					printf("\rseed: %d\n", seed);
 					clearArray(buffer, a);
 				}
