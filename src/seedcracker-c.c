@@ -34,19 +34,18 @@ int main(void) {
 	int a;
 	int *uInput;
 
-
+	/* User input */
 	fputs("Amount: ", stdout);
 	scanf("%d", &a);
 
-	/* User input */
 	uInput = malloc(sizeof(int) * a);
-
 	for(int i = 0; i < a; i++) {
 		printf("%d: ", i+1);
 		scanf("%d", &uInput[i]);
 	}
 
-	seedcrack(uInput, a); // crack
+	/* Crack */
+	seedcrack(uInput, a);
 
 	/* Memory deallocation*/
 	free(uInput);
