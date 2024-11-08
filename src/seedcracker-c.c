@@ -1,91 +1,109 @@
 /*
  ============================================================================
  Name        : seedcracker-c.c
- Author      : Upwn, LemonBarsXD
- Version     : 1.0
- Copyright   : MIT License, Copyright (c) 2023 Upwn
- Description : Rand seedcracker in c
+ Author      : Linus.T, LemonBarsXD
+ Version     : 2.0
+ Description : stdlib Rand() seedcracker in c
  ============================================================================
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-/* Amount of seeds to search
- 	 * Default is 0x7FFFFF
+/* SEARCH_DEPTH is the amount of seeds to search
  	 * This larger the value the longer it takes to open the executable (idk why)
 */
-#define SEARCH_DEPTH (0x7FFFFF)
+
+#define SEARCH_DEPTH 	0x7FFFF
+#define MAX_RAND	100
 
 /* RAND_MAX is the maximum value that may be returned by rand.
-	* The minimum is zero.
 	* Default is 0x7FFF or 32767.
-	* It is declared in the stdlib.h header file.
-	* I don't know how to change it, figure it out yourself lol.
 */
 
-void clearArray( int *array, int size ); // clearing the array by size (zeroing)
-void seedcrack( int input[], int a ); // takes input(s) and amount of input(s)
+void clearArray( unsigned int *array, int size 		    );  // clearing the array (zeroing)
+void seedcrack ( unsigned int *input, unsigned int count    );  // bruteforce seedcrack
 
 
-int main(void) {
+int main(int argc, char **argv) {
 
-	/* Initial memory allocation */
-	int a;
-	int *uInput;
 
-	/* User input */
-	fputs("Amount: ", stdout);
-	scanf("%d", &a);
-
-	uInput = malloc(sizeof(int) * a);
-	for(int i = 0; i < a; i++) {
-		printf("%d: ", i+1);
-		scanf("%d", &uInput[i]);
+	if(argc == 1)
+	{
+		fprintf(stderr, "Usage: ./seedcracker {arg1} {arg2}...\n");
+		return 1;
+	}
+	
+	for(int i = 1; i < argc; ++i)
+	{
+		int arg = atoi(argv[i]); // expecting no error
+		if(arg > MAX_RAND)
+		{
+			fprintf(stderr, "arg%d: %d, is bigger than MAX_RAND: %d \n", i, arg, MAX_RAND);
+			return 1;
+		}
 	}
 
-	/* Crack */
-	seedcrack(uInput, a);
+	size_t inputSize = sizeof(unsigned int) * (argc - 1);
+    	if (inputSize / sizeof(unsigned int) != (size_t)(argc - 1)) {
+        	fprintf(stderr, "Too many arguments, allocation size too large.\n");
+        	return 1;
+    	}
 
-	/* Memory deallocation*/
+	unsigned int *uInput = malloc(sizeof(unsigned int) * (argc-1));
+	if(uInput == NULL)
+	{
+		fprintf(stderr, "Memory allocation failed.\n");
+	}
+
+	for(int i = 1; i < argc; ++i)
+	{
+		uInput[i-1] = atoi(argv[i]); // expecting no error
+	}
+
+	clock_t start = clock(); // Start timing
+    	seedcrack(uInput, argc - 1);
+    	clock_t end = clock(); // End timing
+
+    	printf("Execution time: %.2f seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+
 	free(uInput);
 
-	/* Exiting */
-	return EXIT_SUCCESS;
+	return 0;
 }
 
-void clearArray( int *array, int size ) {
-	for(int i = 0; i < size; i++) {
+void clearArray( unsigned int *array, int size ) {
+	for(int i = 0; i < size; ++i) {
 		array[i] = 0;
 	}
 }
 
-
-void seedcrack( int input[], int a ) {
-	int buffer[a];
+void seedcrack(unsigned int *input, unsigned int count ) {
 	unsigned int seed;
+	unsigned int buffer[count];
 
-
-	// TODO: Maybe faster and more optimised
-
-	for(seed = 1; seed < SEARCH_DEPTH; seed++) {
+	for ( seed = 1; seed < SEARCH_DEPTH; ++seed ) 
+	{
 		srand(seed);
-		for(unsigned int i = 0; i < a; i++) {
-				buffer[i] = rand();
-			}
-
-		for(unsigned int j = 0; j < a; j++) {
-			if(input[j] == buffer[j]) {
-				if(j+1 == a) {
-					printf("\rseed: %d\n", seed);
-					clearArray(buffer, a);
-				}
-			}else {
-				clearArray(buffer, a);
-				break;
-			}
+		
+		for ( size_t i = 0; i < count; ++i ) 
+		{
+			buffer[i] = rand() % MAX_RAND;
 		}
-		printf("\r%.3f %%", (float) seed/SEARCH_DEPTH*100); // printf the progress in percent with 3 decimal accuracy
-	}
 
+		if ( memcmp(input, buffer, count * sizeof(unsigned int)) == 0 ) 
+		{
+			printf("\rFound seed %d\n", seed);
+		}
+		
+		
+		if ( seed % 1000 == 0 ) {
+			printf("\r%.3f %%", (float) seed / SEARCH_DEPTH * 100); // prints the progress in percent with 3 decimal accuracy to console
+		}
+	}
+	
+	printf("\nDONE!\n");
 }
